@@ -102,19 +102,26 @@ describe('buildSquashfs', () => {
 });
 
 describe('unsquashfs verification', () => {
-  const UNSQUASHFS = join(process.env.HOME!, '.nix-profile', 'bin', 'unsquashfs');
-
-  function unsquashfsAvailable(): boolean {
-    try {
-      execSync(`${UNSQUASHFS} -help`, { stdio: 'pipe' });
-      return true;
-    } catch (err: any) {
-      return err.stdout?.length > 0 || err.stderr?.length > 0;
+  function findUnsquashfs(): string | null {
+    const candidates = [
+      join(process.env.HOME!, '.nix-profile', 'bin', 'unsquashfs'),
+      '/usr/bin/unsquashfs',
+      'unsquashfs',
+    ];
+    for (const bin of candidates) {
+      try {
+        execSync(`${bin} -help`, { stdio: 'pipe' });
+        return bin;
+      } catch (err: any) {
+        if (err.stdout?.length > 0 || err.stderr?.length > 0) return bin;
+      }
     }
+    return null;
   }
 
   it('unsquashfs extracts all files byte-for-byte', () => {
-    if (!unsquashfsAvailable()) {
+    const unsquashfs = findUnsquashfs();
+    if (!unsquashfs) {
       console.warn('unsquashfs not available, skipping');
       return;
     }
@@ -126,7 +133,7 @@ describe('unsquashfs verification', () => {
 
     try {
       writeFileSync(sqfsPath, image);
-      execSync(`${UNSQUASHFS} -d ${extractDir} -no-xattrs ${sqfsPath}`, { stdio: 'pipe' });
+      execSync(`${unsquashfs} -d ${extractDir} -no-xattrs ${sqfsPath}`, { stdio: 'pipe' });
 
       const extracted = readdirSync(extractDir).sort();
       expect(extracted).toEqual(['AppRun', 'test.desktop', 'test.png']);
