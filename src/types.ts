@@ -69,5 +69,6 @@ export interface SquashfsFile {
   mode: number;
 }
 
+export type BinaryInput = ArrayBuffer | Uint8Array;
 export type CompressFn = (data: Uint8Array) => Uint8Array;
 export type DecompressFn = (data: Uint8Array) => Uint8Array;

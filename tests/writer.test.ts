@@ -38,41 +38,41 @@ describe('buildSquashfs', () => {
   });
 
   it('has a valid superblock magic', () => {
-    const sb = parseSuperblock(image.buffer);
+    const sb = parseSuperblock(image);
     expect(sb.magic).toBe(0x73717368);
   });
 
   it('has version 4.0', () => {
-    const sb = parseSuperblock(image.buffer);
+    const sb = parseSuperblock(image);
     expect(sb.versionMajor).toBe(4);
     expect(sb.versionMinor).toBe(0);
   });
 
   it('uses gzip compression', () => {
-    const sb = parseSuperblock(image.buffer);
+    const sb = parseSuperblock(image);
     expect(sb.compressor).toBe(Compressor.GZIP);
   });
 
   it('counts 4 inodes', () => {
-    const sb = parseSuperblock(image.buffer);
+    const sb = parseSuperblock(image);
     expect(sb.inodeCount).toBe(4);
   });
 
   it('counts 1 fragment', () => {
-    const sb = parseSuperblock(image.buffer);
+    const sb = parseSuperblock(image);
     expect(sb.fragCount).toBe(1);
   });
 
   it('has NO_XATTRS flag', () => {
-    const sb = parseSuperblock(image.buffer);
+    const sb = parseSuperblock(image);
     expect(sb.flags & SuperblockFlags.NO_XATTRS).toBeTruthy();
   });
 
   it('has a root dir inode', () => {
-    const sb = parseSuperblock(image.buffer);
+    const sb = parseSuperblock(image);
     const { blockOffset, byteOffset } = decodeMetadataRef(sb.rootInodeRef);
     const block = readMetadataBlock(
-      image.buffer,
+      image,
       Number(sb.inodeTableOffset) + blockOffset,
       decompress,
     );
@@ -82,16 +82,16 @@ describe('buildSquashfs', () => {
   });
 
   it('directory lists all 3 files alphabetically', () => {
-    const sb = parseSuperblock(image.buffer);
+    const sb = parseSuperblock(image);
     const { blockOffset, byteOffset } = decodeMetadataRef(sb.rootInodeRef);
     const inodeBlock = readMetadataBlock(
-      image.buffer,
+      image,
       Number(sb.inodeTableOffset) + blockOffset,
       decompress,
     );
     const dirInode = parseBasicDirInode(inodeBlock.data, byteOffset);
     const dirBlock = readMetadataBlock(
-      image.buffer,
+      image,
       Number(sb.dirTableOffset) + dirInode.dirBlockIndex!,
       decompress,
     );

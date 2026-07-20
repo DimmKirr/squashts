@@ -3,14 +3,23 @@ import {
   SUPERBLOCK_SIZE,
   type Superblock,
   type CompressorId,
+  type BinaryInput,
   type DecompressFn,
 } from './types.js';
 
-export function parseSuperblock(buf: ArrayBuffer): Superblock {
-  if (buf.byteLength < SUPERBLOCK_SIZE) {
-    throw new Error(`Buffer too small for superblock: ${buf.byteLength} < ${SUPERBLOCK_SIZE}`);
+function resolve(input: BinaryInput): { buf: ArrayBuffer; off: number; len: number } {
+  if (ArrayBuffer.isView(input)) {
+    return { buf: input.buffer as ArrayBuffer, off: input.byteOffset, len: input.byteLength };
   }
-  const dv = new DataView(buf);
+  return { buf: input, off: 0, len: input.byteLength };
+}
+
+export function parseSuperblock(input: BinaryInput): Superblock {
+  const { buf, off, len } = resolve(input);
+  if (len < SUPERBLOCK_SIZE) {
+    throw new Error(`Buffer too small for superblock: ${len} < ${SUPERBLOCK_SIZE}`);
+  }
+  const dv = new DataView(buf, off, len);
   const magic = dv.getUint32(0, true);
   if (magic !== SQUASHFS_MAGIC) {
     throw new Error(`Bad magic: 0x${magic.toString(16)} (expected 0x${SQUASHFS_MAGIC.toString(16)})`);
@@ -39,15 +48,17 @@ export function parseSuperblock(buf: ArrayBuffer): Superblock {
 }
 
 export function readMetadataBlock(
-  buf: ArrayBuffer,
+  input: BinaryInput,
   offset: number,
   decompress: DecompressFn,
 ): { data: Uint8Array; diskSize: number } {
-  const dv = new DataView(buf, offset, 2);
+  const { buf, off } = resolve(input);
+  const abs = off + offset;
+  const dv = new DataView(buf, abs, 2);
   const header = dv.getUint16(0, true);
   const isUncompressed = (header & 0x8000) !== 0;
   const size = header & 0x7fff;
-  const payload = new Uint8Array(buf, offset + 2, size);
+  const payload = new Uint8Array(buf, abs + 2, size);
   const data = isUncompressed ? payload.slice() : decompress(payload);
   return { data, diskSize: 2 + size };
 }

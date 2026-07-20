@@ -11,6 +11,7 @@ export {
   type CompressorId,
   type Superblock,
   type SquashfsFile,
+  type BinaryInput,
   type CompressFn,
   type DecompressFn,
 } from './types.js';

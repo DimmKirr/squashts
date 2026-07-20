@@ -21,7 +21,7 @@ const REF_SQUASHFS = readFileSync(join(FIXTURES_DIR, 'ref-minimal.squashfs'));
 const zlibDecompress: DecompressFn = (data) => new Uint8Array(inflateSync(data));
 
 describe('parseSuperblock', () => {
-  const sb = parseSuperblock(REF_SQUASHFS.buffer);
+  const sb = parseSuperblock(REF_SQUASHFS);
 
   it('reads the magic number', () => {
     expect(sb.magic).toBe(0x73717368);
@@ -85,11 +85,11 @@ describe('parseSuperblock', () => {
 });
 
 describe('metadata + inode parsing against reference squashfs', () => {
-  const sb = parseSuperblock(REF_SQUASHFS.buffer);
+  const sb = parseSuperblock(REF_SQUASHFS);
 
   it('can read the inode table metadata block', () => {
     const block = readMetadataBlock(
-      REF_SQUASHFS.buffer,
+      REF_SQUASHFS,
       Number(sb.inodeTableOffset),
       zlibDecompress,
     );
@@ -100,7 +100,7 @@ describe('metadata + inode parsing against reference squashfs', () => {
   it('can parse the root directory inode', () => {
     const { blockOffset, byteOffset } = decodeMetadataRef(sb.rootInodeRef);
     const block = readMetadataBlock(
-      REF_SQUASHFS.buffer,
+      REF_SQUASHFS,
       Number(sb.inodeTableOffset) + blockOffset,
       zlibDecompress,
     );
@@ -113,13 +113,13 @@ describe('metadata + inode parsing against reference squashfs', () => {
   it('can parse directory entries and find all 3 files', () => {
     const { blockOffset, byteOffset } = decodeMetadataRef(sb.rootInodeRef);
     const inodeBlock = readMetadataBlock(
-      REF_SQUASHFS.buffer,
+      REF_SQUASHFS,
       Number(sb.inodeTableOffset) + blockOffset,
       zlibDecompress,
     );
     const dirInode = parseBasicDirInode(inodeBlock.data, byteOffset);
     const dirBlock = readMetadataBlock(
-      REF_SQUASHFS.buffer,
+      REF_SQUASHFS,
       Number(sb.dirTableOffset) + dirInode.dirBlockIndex!,
       zlibDecompress,
     );
@@ -131,13 +131,13 @@ describe('metadata + inode parsing against reference squashfs', () => {
   it('file inodes reference a fragment', () => {
     const { blockOffset, byteOffset } = decodeMetadataRef(sb.rootInodeRef);
     const inodeBlock = readMetadataBlock(
-      REF_SQUASHFS.buffer,
+      REF_SQUASHFS,
       Number(sb.inodeTableOffset) + blockOffset,
       zlibDecompress,
     );
     const dirInode = parseBasicDirInode(inodeBlock.data, byteOffset);
     const dirBlock = readMetadataBlock(
-      REF_SQUASHFS.buffer,
+      REF_SQUASHFS,
       Number(sb.dirTableOffset) + dirInode.dirBlockIndex!,
       zlibDecompress,
     );
