@@ -1,6 +1,6 @@
 {
   "name": "@dimmkirr/squashts",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Pure TypeScript squashfs 4.0 reader/writer — zero dependencies, runs in Cloudflare Workers and V8 isolates",
   "type": "module",
   "exports": {
