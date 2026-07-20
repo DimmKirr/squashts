@@ -1,0 +1,1 @@
+# Squashfs TypeScript
