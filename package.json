@@ -1,0 +1,36 @@
+{
+  "name": "@dimmkirr/squashts",
+  "version": "0.1.0",
+  "description": "Pure TypeScript squashfs 4.0 reader/writer — zero dependencies, runs in Cloudflare Workers and V8 isolates",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "tsc"
+  },
+  "keywords": [
+    "squashfs",
+    "appimage",
+    "linux",
+    "filesystem",
+    "binary"
+  ],
+  "author": "Dmitry Kirillov <dmitry@hazelops.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}
