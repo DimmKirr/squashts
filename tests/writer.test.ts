@@ -113,7 +113,7 @@ describe('unsquashfs verification', () => {
         execSync(`${bin} -help`, { stdio: 'pipe' });
         return bin;
       } catch (err: any) {
-        if (err.stdout?.length > 0 || err.stderr?.length > 0) return bin;
+        if (err.status !== 127 && (err.stdout?.length > 0 || err.stderr?.length > 0)) return bin;
       }
     }
     return null;
